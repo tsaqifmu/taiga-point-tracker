@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import Login from './components/Login.vue';
+import { Toaster } from '@/components/ui/sonner';
 </script>
 
 <template>
-  <Login />
+  <Toaster />
+  <RouterView />
 </template>
 
 <style scoped></style>
