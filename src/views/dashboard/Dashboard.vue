@@ -11,7 +11,7 @@ const handleLogout = () => {
 
 <template>
   <div class="p-6">
-    <div>this is dashboard page</div>
+    <h1>haloo {{ authStore.user.username }}</h1>
     <div>
       <Button @click="handleLogout" class="text-white"> Logout </Button>
     </div>
