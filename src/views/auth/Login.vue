@@ -18,11 +18,7 @@ const authStore = useAuthStore();
 const handleLogin = async () => {
   try {
     const success = await authStore.login(username.value, password.value);
-    console.log('Login button clicked', {
-      username: username.value,
-      password: password.value,
-      success: success,
-    });
+
     if (success) {
       toast.success('Login berhasil', {
         description: 'Selamat datang kembali!',

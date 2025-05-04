@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { taigaService } from '@/services/taiga';
+import router from '@/router';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -84,6 +85,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  // New method to update token
+  const updateToken = (token: string) => {
+    authToken.value = token;
+    localStorage.setItem('auth_token', token);
+  };
+
+  // New method for logout
+  const logout = () => {
+    // Clear state
+    user.value = null;
+    authToken.value = null;
+    refreshToken.value = null;
+
+    // Remove from localStorage
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+
+    // Navigate to login
+    router.push({ name: 'login' });
+
+    toast.info('Logged out', {
+      description: 'You have been logged out of your account',
+    });
+  };
+
   // Initialize on store creation
   initializeAuth();
 
@@ -93,5 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     isAuthenticated,
     login,
+    logout,
+    updateToken,
   };
 });
