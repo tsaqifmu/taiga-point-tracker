@@ -42,9 +42,9 @@ const togglePasswordVisibility = () => {
 </script>
 
 <template>
-  <div class="flex h-screen w-full items-center justify-center bg-gray-100">
+  <div class="bg-background flex h-screen w-full items-center justify-center">
     <div
-      class="flex h-1/2 w-1/3 flex-col justify-center rounded-lg bg-white p-8 shadow-lg"
+      class="shadow-shadow border-border flex h-1/2 w-100 flex-col justify-center rounded-lg border-2 bg-white p-8"
     >
       <h1 class="mb-8 text-center text-3xl font-bold">Taiga Point Tracker</h1>
       <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
