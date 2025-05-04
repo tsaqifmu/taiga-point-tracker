@@ -15,14 +15,13 @@ const handleLogout = () => {
       <img
         :src="authStore.user?.photo ?? undefined"
         alt="photo profle"
-        class="border-border rounded-xl border-2"
+        class="border-border shadow-shadow rounded-xl border-2"
       />
       <div>
         <h1 class="text-3xl font-bold">haloo {{ authStore.user?.username }}</h1>
+        <Button @click="handleLogout" class="mt-5 text-white"> Logout </Button>
       </div>
     </div>
-    <div>
-      <Button @click="handleLogout" class="text-white"> Logout </Button>
-    </div>
+    <div></div>
   </div>
 </template>
