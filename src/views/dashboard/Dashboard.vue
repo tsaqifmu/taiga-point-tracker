@@ -10,8 +10,10 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div>this is dashboard page</div>
-  <div>
-    <Button @click="handleLogout" class="text-white"> Logout </Button>
+  <div class="p-6">
+    <div>this is dashboard page</div>
+    <div>
+      <Button @click="handleLogout" class="text-white"> Logout </Button>
+    </div>
   </div>
 </template>

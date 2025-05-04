@@ -43,7 +43,7 @@ const togglePasswordVisibility = () => {
 
 <template>
   <div
-    class="flex h-screen w-full items-center justify-center bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:40px_40px]"
+    class="flex h-screen w-full items-center justify-center bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:40px_40px] px-5"
   >
     <div
       class="shadow-shadow border-border flex h-1/2 w-100 flex-col justify-center rounded-lg border-2 bg-white p-8"
