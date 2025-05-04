@@ -25,7 +25,7 @@ const router = createRouter({
 });
 
 // Navigation guard to check authentication before accessing routes
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth !== false; // Default to true if not specified
 
