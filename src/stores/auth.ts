@@ -4,13 +4,14 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import router from '@/router';
+import type { User } from '@/type/user';
 // Constants
 const AUTH_TOKEN_EXPIRY = 1; // days
 const REFRESH_TOKEN_EXPIRY = 7; // days
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const user = ref<any | null>(null);
+  const user = ref<User | null>(null);
   // Computed
   const isAuthenticated = computed(() => !!Cookies.get('auth_token'));
 
@@ -35,12 +36,15 @@ export const useAuthStore = defineStore('auth', () => {
    * @returns boolean indicating success
    */
   const setUserData = (response: any): boolean => {
+    console.log('Setting user data:', response);
+
     user.value = {
       id: response.id,
       username: response.username,
       fullName: response.full_name,
       email: response.email,
-      photo: response.photo,
+      photo: response.big_photo,
+      roles: response.roles,
     };
 
     // Store tokens in cookies

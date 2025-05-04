@@ -11,7 +11,16 @@ const handleLogout = () => {
 
 <template>
   <div class="p-6">
-    <h1>haloo {{ authStore.user.username }}</h1>
+    <div class="flex gap-x-6">
+      <img
+        :src="authStore.user?.photo ?? undefined"
+        alt="photo profle"
+        class="border-border rounded-xl border-2"
+      />
+      <div>
+        <h1 class="text-3xl font-bold">haloo {{ authStore.user?.username }}</h1>
+      </div>
+    </div>
     <div>
       <Button @click="handleLogout" class="text-white"> Logout </Button>
     </div>
