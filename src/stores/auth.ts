@@ -4,7 +4,9 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import router from '@/router';
-import { taigaService } from '@/services/taiga';
+// Constants
+const AUTH_TOKEN_EXPIRY = 1; // days
+const REFRESH_TOKEN_EXPIRY = 7; // days
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -12,92 +14,69 @@ export const useAuthStore = defineStore('auth', () => {
   // Computed
   const isAuthenticated = computed(() => !!Cookies.get('auth_token'));
 
-  // Initialize from cookies and localStorage
+  /**
+   * Initializes auth state from localStorage
+   */
   const initializeAuth = () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      user.value = JSON.parse(storedUser);
-    }
-  };
-
-  // Actions
-  const login = async (username: string, password: string) => {
-    try {
-      const response = await taigaService.login(username, password);
-
-      user.value = {
-        id: response.id,
-        username: response.username,
-        fullName: response.full_name,
-        email: response.email,
-        photo: response.photo,
-      };
-
-      // Store tokens in cookies
-      Cookies.set('auth_token', response.auth_token, {
-        expires: 1, // 1 day expiration
-        secure: true,
-        sameSite: 'Strict',
-      });
-
-      Cookies.set('refresh_token', response.refresh, {
-        expires: 7, // 7 day expiration
-        secure: true,
-        sameSite: 'Strict',
-      });
-
-      // Store user info in localStorage (non-sensitive data)
-      localStorage.setItem('user', JSON.stringify(user.value));
-      return true;
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        const errorData = error.response.data;
-        let errorMessage = '';
-
-        // Case 1: Error with detail format (invalid credentials)
-        if (errorData.detail) {
-          errorMessage = errorData.detail;
-        }
-        // Case 2, 3, 4: Field validation errors
-        else {
-          const errorMessages: any = [];
-
-          // Process all existing field errors
-          Object.keys(errorData).forEach((field) => {
-            if (Array.isArray(errorData[field])) {
-              errorMessages.push(`${field}: ${errorData[field].join(', ')}`);
-            }
-          });
-
-          errorMessage = errorMessages.join('; ');
-        }
-
-        toast.error('Login failed', {
-          description: errorMessage,
-          duration: 5000,
-        });
-      } else {
-        // Handle errors without response.data
-        toast.error('Login failed', {
-          description: 'An error occurred while connecting to the server',
-          duration: 5000,
-        });
+      try {
+        user.value = JSON.parse(storedUser);
+      } catch (error) {
+        console.error('Failed to parse stored user data:', error);
+        localStorage.removeItem('user');
       }
-      console.error('Login failed:', error);
-      return false;
     }
   };
 
-  // Method to update token
+  /**
+   * Sets user data and stores authentication tokens
+   * @param response The authentication response from API
+   * @returns boolean indicating success
+   */
+  const setUserData = (response: any): boolean => {
+    user.value = {
+      id: response.id,
+      username: response.username,
+      fullName: response.full_name,
+      email: response.email,
+      photo: response.photo,
+    };
+
+    // Store tokens in cookies
+    Cookies.set('auth_token', response.auth_token, {
+      expires: AUTH_TOKEN_EXPIRY,
+      secure: true,
+      sameSite: 'Strict',
+    });
+
+    Cookies.set('refresh_token', response.refresh, {
+      expires: REFRESH_TOKEN_EXPIRY, // 7 day expiration
+      secure: true,
+      sameSite: 'Strict',
+    });
+
+    // Store user info in localStorage (non-sensitive data)
+    localStorage.setItem('user', JSON.stringify(user.value));
+    return true;
+  };
+
+  /**
+   * Updates the authentication token
+   * @param token The new token to store
+   */
   const updateToken = (token: string) => {
     Cookies.set('auth_token', token, {
-      expires: 1, // 1 day expiration
+      expires: AUTH_TOKEN_EXPIRY,
       secure: true,
       sameSite: 'Strict',
     });
   };
 
-  // Method for logout
+  /**
+   * Logs the user out and clears auth state
+   * @returns void
+   */
   const logout = () => {
     // Clear state
     user.value = null;
@@ -123,8 +102,8 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     isAuthenticated,
-    login,
     logout,
     updateToken,
+    setUserData,
   };
 });

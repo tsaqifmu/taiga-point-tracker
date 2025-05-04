@@ -1,39 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { toast } from 'vue-sonner';
 
-import router from '@/router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuthStore } from '@/stores/auth';
+import { useLoginMutation } from '@/composable/mutations/useAuthMutation';
 
 // State
 const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
 
-// Composables
-const authStore = useAuthStore();
+// Use login mutation
+const { mutate: login, isPending } = useLoginMutation();
 
 // Methods
-const handleLogin = async () => {
-  try {
-    const success = await authStore.login(username.value, password.value);
-
-    if (success) {
-      toast.success('Login successful', {
-        description: 'Welcome back!',
-        duration: 3000,
-      });
-      router.push({ name: 'dashboard' });
-    }
-  } catch (error) {
-    toast.error('An error occurred', {
-      description:
-        error instanceof Error ? error.message : 'Please try again later',
-      duration: 5000,
-    });
-  }
+const handleLogin = () => {
+  login({
+    username: username.value,
+    password: password.value,
+  });
 };
 
 const togglePasswordVisibility = () => {
@@ -120,8 +105,11 @@ const togglePasswordVisibility = () => {
         </div>
 
         <!-- Submit button -->
-        <Button type="submit" class="w-full text-lg font-bold text-white"
-          >Login</Button
+        <Button
+          type="submit"
+          class="w-full text-lg font-bold text-white"
+          :disabled="isPending"
+          >{{ isPending ? 'Logging in...' : 'Login' }}</Button
         >
       </form>
     </div>
