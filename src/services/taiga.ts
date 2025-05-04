@@ -1,5 +1,7 @@
-import { useAuthStore } from '@/stores/auth';
+import Cookies from 'js-cookie';
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
+
+import { useAuthStore } from '@/stores/auth';
 
 // Create axios instance
 const taigaApi = axios.create({
@@ -12,7 +14,7 @@ const taigaApi = axios.create({
 
 // Request interceptor to add the token to the headers if it exists
 taigaApi.interceptors.request.use((config) => {
-  const auth_token = localStorage.getItem('auth_token');
+  const auth_token = Cookies.get('auth_token');
   if (auth_token) {
     config.headers.Authorization = `Bearer ${auth_token}`;
   }
@@ -34,21 +36,27 @@ taigaApi.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      localStorage.getItem('refresh_token')
+      Cookies.get('refresh_token')
     ) {
       originalRequest._retry = true;
 
       try {
         // Attempt to refresh the token
-        const refreshToken = localStorage.getItem('refresh_token');
+        const refreshToken = Cookies.get('refresh_token');
         const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/auth/refresh`,
           { refresh: refreshToken }
         );
 
-        // Update tokens in localStorage and auth store
+        // Update token in cookie
         const newToken = response.data.auth_token;
-        localStorage.setItem('auth_token', newToken);
+
+        //! Kayaknya kode dibawah ngga perlu, karena kita udah set di function updateToken
+        // Cookies.set('auth_token', newToken, {
+        //   expires: 1, // 1 day expiration
+        //   secure: true,
+        //   sameSite: 'Strict',
+        // });
 
         // Update the auth store
         const authStore = useAuthStore();

@@ -1,28 +1,23 @@
+import Cookies from 'js-cookie';
 import { toast } from 'vue-sonner';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import { taigaService } from '@/services/taiga';
 import router from '@/router';
+import { taigaService } from '@/services/taiga';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<any | null>(null);
-  const authToken = ref<string | null>(null);
-  const refreshToken = ref<string | null>(null);
-
   // Computed
-  const isAuthenticated = computed(() => !!authToken.value);
+  const isAuthenticated = computed(() => !!Cookies.get('auth_token'));
 
-  // Initilaize from local storage
+  // Initialize from cookies and localStorage
   const initializeAuth = () => {
-    const storedAuthToken = localStorage.getItem('auth_token');
-    const storedRefreshToken = localStorage.getItem('refresh_token');
     const storedUser = localStorage.getItem('user');
-
-    if (storedAuthToken) authToken.value = storedAuthToken;
-    if (storedRefreshToken) refreshToken.value = storedRefreshToken;
-    if (storedUser) user.value = JSON.parse(storedUser);
+    if (storedUser) {
+      user.value = JSON.parse(storedUser);
+    }
   };
 
   // Actions
@@ -30,9 +25,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await taigaService.login(username, password);
 
-      // Set state
-      authToken.value = response.auth_token;
-      refreshToken.value = response.refresh;
       user.value = {
         id: response.id,
         username: response.username,
@@ -41,9 +33,20 @@ export const useAuthStore = defineStore('auth', () => {
         photo: response.photo,
       };
 
-      // Store in local storage
-      localStorage.setItem('auth_token', response.auth_token);
-      localStorage.setItem('refresh_token', response.refresh);
+      // Store tokens in cookies
+      Cookies.set('auth_token', response.auth_token, {
+        expires: 1, // 1 day expiration
+        secure: true,
+        sameSite: 'Strict',
+      });
+
+      Cookies.set('refresh_token', response.refresh, {
+        expires: 7, // 7 day expiration
+        secure: true,
+        sameSite: 'Strict',
+      });
+
+      // Store user info in localStorage (non-sensitive data)
       localStorage.setItem('user', JSON.stringify(user.value));
       return true;
     } catch (error: any) {
@@ -85,22 +88,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  // New method to update token
+  // Method to update token
   const updateToken = (token: string) => {
-    authToken.value = token;
-    localStorage.setItem('auth_token', token);
+    Cookies.set('auth_token', token, {
+      expires: 1, // 1 day expiration
+      secure: true,
+      sameSite: 'Strict',
+    });
   };
 
-  // New method for logout
+  // Method for logout
   const logout = () => {
     // Clear state
     user.value = null;
-    authToken.value = null;
-    refreshToken.value = null;
+
+    // Remove tokens from cookies
+    Cookies.remove('auth_token');
+    Cookies.remove('refresh_token');
 
     // Remove from localStorage
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
 
     // Navigate to login
@@ -116,8 +122,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
-    authToken,
-    refreshToken,
     isAuthenticated,
     login,
     logout,
