@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 
 import router from '@/router';
 import type { User } from '@/type/user';
+import { formatMediaUrl } from '@/utils/formatMediaUrl';
 // Constants
 const AUTH_TOKEN_EXPIRY = 1; // days
 const REFRESH_TOKEN_EXPIRY = 7; // days
@@ -36,14 +37,12 @@ export const useAuthStore = defineStore('auth', () => {
    * @returns boolean indicating success
    */
   const setUserData = (response: any): boolean => {
-    console.log('Setting user data:', response);
-
     user.value = {
       id: response.id,
       username: response.username,
       fullName: response.full_name,
       email: response.email,
-      photo: response.big_photo,
+      photo: formatMediaUrl(response.big_photo),
       roles: response.roles,
     };
 
